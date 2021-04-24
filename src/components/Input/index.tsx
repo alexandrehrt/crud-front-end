@@ -19,7 +19,7 @@ const Input: React.FC<InputProps> = ({
   placeholder,
 }: InputData) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { fieldName, registerField } = useField(name);
+  const { fieldName, registerField, error } = useField(name);
 
   useEffect(() => {
     registerField({
@@ -32,6 +32,7 @@ const Input: React.FC<InputProps> = ({
   return (
     <Container>
       <input ref={inputRef} type={type} placeholder={placeholder} />
+      <p>{error}</p>
     </Container>
   );
 };

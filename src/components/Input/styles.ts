@@ -5,16 +5,22 @@ export const Container = styled.div`
     width: 100%;
     padding: 1rem;
     border: none;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid #000;
     font-size: 1.6rem;
     background-color: transparent;
 
     &:focus {
-      border-bottom: 1px solid #9966cc;
+      border-bottom: 1px solid var(--purple);
 
       &::placeholder {
-        color: #9966cc;
+        color: var(--purple);
       }
     }
+  }
+
+  p {
+    font-size: 1.4rem;
+    color: red;
+    margin-top: 0.6rem;
   }
 `;

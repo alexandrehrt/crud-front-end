@@ -7,8 +7,6 @@ export const Container = styled.div`
 
   form {
     width: 40rem;
-    margin: 0 auto;
-
     display: grid;
     gap: 2.4rem;
 
@@ -16,7 +14,7 @@ export const Container = styled.div`
       padding: 1rem;
       border: none;
       border-radius: 0.4rem;
-      background-color: #9966cc;
+      background-color: var(--purple);
       color: white;
       font-size: 1.6rem;
       transition: all 0.2s;
