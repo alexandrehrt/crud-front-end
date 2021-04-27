@@ -1,20 +1,26 @@
 import { Form } from '@unform/web';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useContext, useRef, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import * as Yup from 'yup';
 import Loader from 'react-loader-spinner';
-
+import Link from 'next/link';
 import { FormHandles } from '@unform/core';
-import Input from '../components/Input';
 
-import { Container } from '../../styles/pages/Login';
-import api from '../services/api';
+import { Container } from '../../styles/pages/LoginAndSignUp';
+import Input from '../components/Input';
 import getValidationErrors from '../utils/getValidationErrors';
+import { AuthContext } from '../hooks/AuthContext';
+
+interface SignInFormData {
+  email: string;
+  password: string;
+}
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const formRef = useRef<FormHandles>(null);
+  const { signIn } = useContext(AuthContext);
 
   const notify = (message: string) => {
     message === 'error'
@@ -26,37 +32,41 @@ const Login: React.FC = () => {
         });
   };
 
-  const handleSubmit = useCallback(async ({ email, password }) => {
-    try {
-      formRef.current?.setErrors({});
+  const handleSubmit = useCallback(
+    async ({ email, password }: SignInFormData) => {
+      try {
+        formRef.current?.setErrors({});
 
-      setLoading(true);
+        setLoading(true);
 
-      const schema = Yup.object().shape({
-        email: Yup.string()
-          .required('E-mail obrigatório')
-          .email('Digite um e-mail válido'),
-        password: Yup.string().min(6, 'Senha deve ter no mínimo 6 digítos'),
-      });
+        const schema = Yup.object().shape({
+          email: Yup.string()
+            .required('E-mail obrigatório')
+            .email('Digite um e-mail válido'),
+          password: Yup.string().min(6, 'Senha deve ter no mínimo 6 dígitos'),
+        });
 
-      await schema.validate({ email, password }, { abortEarly: false });
+        await schema.validate({ email, password }, { abortEarly: false });
 
-      await api.post('/sessions', { email, password });
+        signIn({ email, password });
 
-      setLoading(false);
-    } catch (error) {
-      notify('error');
+        setLoading(false);
+      } catch (error) {
+        notify('error');
 
-      setLoading(false);
+        setLoading(false);
 
-      const errors = getValidationErrors(error);
-      formRef.current?.setErrors(errors);
-    }
-  }, []);
+        const errors = getValidationErrors(error);
+        formRef.current?.setErrors(errors);
+      }
+    },
+    [signIn],
+  );
 
   return (
     <Container>
       <div>
+        <h1>Faça seu login</h1>
         <Form ref={formRef} onSubmit={handleSubmit}>
           <Input name="email" type="email" placeholder="E-mail" />
           <Input name="password" type="password" placeholder="Senha" />
@@ -68,6 +78,12 @@ const Login: React.FC = () => {
             )}
           </button>
         </Form>
+        <Link href="/signup">
+          <a>
+            Não tem uma conta? <span>Cadastrar</span>
+          </a>
+        </Link>
+
         <ToastContainer style={{ fontSize: '1.8rem' }} />
       </div>
     </Container>

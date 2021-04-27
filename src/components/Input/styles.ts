@@ -8,6 +8,7 @@ export const Container = styled.div`
     border-bottom: 1px solid #000;
     font-size: 1.6rem;
     background-color: transparent;
+    caret-color: var(--purple);
 
     &:focus {
       border-bottom: 1px solid var(--purple);

@@ -5,10 +5,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import * as Yup from 'yup';
 import Loader from 'react-loader-spinner';
+import Link from 'next/link';
 
 import Input from '../components/Input';
 
-import { Container } from '../../styles/pages/Login';
+import { Container } from '../../styles/pages/LoginAndSignUp';
 import api from '../services/api';
 import getValidationErrors from '../utils/getValidationErrors';
 
@@ -60,6 +61,7 @@ const SignUp: React.FC = () => {
   return (
     <Container>
       <div>
+        <h1>Faça seu cadastro</h1>
         <Form ref={formRef} onSubmit={handleSubmit}>
           <Input name="name" type="text" placeholder="Digite seu nome" />
           <Input name="email" type="email" placeholder="E-mail" />
@@ -72,6 +74,11 @@ const SignUp: React.FC = () => {
             )}
           </button>
         </Form>
+        <Link href="/">
+          <a>
+            Voltar ao <span>login</span>
+          </a>
+        </Link>
         <ToastContainer style={{ fontSize: '1.8rem' }} />
       </div>
     </Container>
