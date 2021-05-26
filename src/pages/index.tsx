@@ -1,7 +1,5 @@
 import { Form } from '@unform/web';
 import { useCallback, useContext, useRef, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import * as Yup from 'yup';
 import Loader from 'react-loader-spinner';
 import Link from 'next/link';
@@ -21,16 +19,6 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const formRef = useRef<FormHandles>(null);
   const { signIn } = useContext(AuthContext);
-
-  const notify = (message: string) => {
-    message === 'error'
-      ? toast.error('Ops, algo deu errado!', {
-          toastId: 'I cannot be duplicated',
-        })
-      : toast.success('Usuário cadastrado com sucesso!', {
-          toastId: 'I cannot be duplicated either',
-        });
-  };
 
   const handleSubmit = useCallback(
     async ({ email, password }: SignInFormData) => {
@@ -52,8 +40,6 @@ const Login: React.FC = () => {
 
         setLoading(false);
       } catch (error) {
-        notify('error');
-
         setLoading(false);
 
         const errors = getValidationErrors(error);
@@ -83,8 +69,6 @@ const Login: React.FC = () => {
             Não tem uma conta? <span>Cadastrar</span>
           </a>
         </Link>
-
-        <ToastContainer style={{ fontSize: '1.8rem' }} />
       </div>
     </Container>
   );

@@ -1,12 +1,14 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, ReactElement, useCallback, useContext } from 'react';
 import { useRouter } from 'next/router';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { setCookie, destroyCookie } from 'nookies';
 import api from '../services/api';
 
-interface AuthState {
-  token: string;
-  user: Record<string, unknown>;
+interface User {
+  id: string;
+  name: string;
+  email: string;
 }
 
 interface SignInCredentials {
@@ -17,41 +19,49 @@ interface SignInCredentials {
 interface AuthContextData {
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
-  user: Record<string, unknown>;
+  notify: (message: string) => void;
+}
+
+interface Children {
+  children: ReactElement;
 }
 
 export const AuthContext = createContext({} as AuthContextData);
 
-export const AuthProvider: React.FC = ({ children }) => {
+export const AuthProvider = ({ children }: Children): ReactElement => {
   const router = useRouter();
-  const [data, setData] = useState<AuthState>(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('@Socialmedia:token');
-      const user = localStorage.getItem('@Socialmedia:user');
 
-      if (token && user) {
-        api.defaults.headers.authorization = `Bearer ${token}`;
-
-        return { token, user: JSON.parse(user) };
-      }
-    }
-    return {} as AuthState;
-  });
+  const notify = (message: string) => {
+    message === 'error'
+      ? toast.error('Ops, algo deu errado!', {
+          toastId: 'I cannot be duplicated',
+        })
+      : toast.success('Usuário cadastrado com sucesso!', {
+          toastId: 'I cannot be duplicated either',
+        });
+  };
 
   const signIn = useCallback(
     async ({ email, password }: SignInCredentials) => {
       try {
-        const response = await api.post('sessions', { email, password });
-        const { token, user } = response.data;
+        const response = await api.post('signin', { email, password });
+        const { user, token } = response.data;
 
-        localStorage.setItem('@Socialmedia:token', token);
-        localStorage.setItem('@Socialmedia:user', JSON.stringify(user));
+        setCookie(undefined, 'socialmedia.token', token, {
+          maxAge: 60 * 60 * 24 * 30, // 30 dias
+          path: '/',
+        });
+
+        setCookie(undefined, 'socialmedia.user', JSON.stringify(user), {
+          maxAge: 60 * 60 * 24 * 30, // 30 dias
+          path: '/',
+        });
 
         api.defaults.headers.authorization = `Bearer ${token}`;
 
-        setData(response.data);
         await router.push('board');
       } catch (error) {
+        notify('error');
         console.log(error);
       }
     },
@@ -59,14 +69,22 @@ export const AuthProvider: React.FC = ({ children }) => {
   );
 
   const signOut = useCallback(() => {
-    localStorage.removeItem('@Navedex:token');
+    destroyCookie(null, 'socialmedia.token');
+    destroyCookie(null, 'socialmedia.user');
 
-    setData({});
-  }, []);
+    router.push('/');
+  }, [router]);
 
   return (
-    <AuthContext.Provider value={{ signIn, signOut, user: data.user }}>
+    <AuthContext.Provider
+      value={{
+        signIn,
+        signOut,
+        notify,
+      }}
+    >
       {children}
+      <ToastContainer style={{ fontSize: '1.8rem' }} />
     </AuthContext.Provider>
   );
 };

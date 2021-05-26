@@ -18,7 +18,7 @@ export default createGlobalStyle`
   }
 
   body {
-    background-color: #f0f8ff;
+    background: linear-gradient(#122B40, #446CB3);
   }
 
    a {
