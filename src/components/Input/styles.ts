@@ -11,6 +11,10 @@ export const Container = styled.div`
     color: white;
     caret-color: var(--purple);
 
+    &::placeholder {
+      color: white;
+    }
+
     &:focus {
       border-bottom: 1px solid var(--purple);
 

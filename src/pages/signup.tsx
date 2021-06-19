@@ -1,4 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
+import { GetServerSideProps } from 'next';
+import nookies from 'nookies';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
@@ -8,7 +10,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Input from '../components/Input';
 
-import { Container } from '../../styles/pages/LoginAndSignUp';
+import { Container } from '../../styles/pages/Forms';
 import api from '../services/api';
 import getValidationErrors from '../utils/getValidationErrors';
 import { useAuth } from '../hooks/AuthContext';
@@ -84,3 +86,20 @@ const SignUp: React.FC = () => {
 };
 
 export default SignUp;
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+  const cookies = nookies.get(ctx);
+
+  if (cookies['socialmedia.token']) {
+    return {
+      redirect: {
+        destination: '/board',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+};

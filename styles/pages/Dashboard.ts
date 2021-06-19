@@ -55,10 +55,10 @@ export const AddUser = styled.div`
     color: white;
     border-radius: 0.8rem;
     margin-right: 0.8rem;
-  }
 
-  &:hover {
-    opacity: 0.8;
+    &:hover {
+      opacity: 0.8;
+    }
   }
 `;
 
@@ -87,6 +87,7 @@ export const Card = styled.div`
 
   img {
     height: 30rem;
+    max-width: 100%;
     border-radius: 0.8rem;
   }
 
@@ -115,5 +116,16 @@ export const CardIcons = styled.div`
     &:hover {
       color: red;
     }
+  }
+`;
+
+export const EmptyMessage = styled.div`
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+
+  h1 {
+    color: white;
   }
 `;

@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: Children): ReactElement => {
       ? toast.error('Ops, algo deu errado!', {
           toastId: 'I cannot be duplicated',
         })
-      : toast.success('Usuário cadastrado com sucesso!', {
+      : toast.success('Operação realizada com sucesso!', {
           toastId: 'I cannot be duplicated either',
         });
   };

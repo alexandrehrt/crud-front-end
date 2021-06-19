@@ -7,6 +7,7 @@ interface InputData {
   name: string;
   type: string;
   placeholder: string;
+  defaultValue: string;
 }
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -17,6 +18,7 @@ const Input: React.FC<InputProps> = ({
   name,
   type,
   placeholder,
+  defaultValue,
 }: InputData) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { fieldName, registerField, error } = useField(name);
@@ -31,7 +33,12 @@ const Input: React.FC<InputProps> = ({
 
   return (
     <Container>
-      <input ref={inputRef} type={type} placeholder={placeholder} />
+      <input
+        ref={inputRef}
+        type={type}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+      />
       <p>{error}</p>
     </Container>
   );

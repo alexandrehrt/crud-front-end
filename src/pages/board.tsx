@@ -1,111 +1,102 @@
 import { GetServerSideProps } from 'next';
+import { useCallback, ReactElement, useState } from 'react';
 import Link from 'next/link';
 import nookies from 'nookies';
-import { ReactElement, useState } from 'react';
-import { useAuth } from '../hooks/AuthContext';
+
+// import { useAuth } from '../hooks/AuthContext';
 
 import {
   Container,
-  Navbar,
   AddUser,
   UsersContainer,
   Card,
   CardIcons,
+  EmptyMessage,
 } from '../../styles/pages/Dashboard';
-import UserInfoModal from '../components/UserInfoModal';
+import ConfirmationModal from '../components/ConfirmationModal';
+import Navbar from '../components/Navbar';
+import api from '../services/api';
 
 interface User {
-  user: {
-    name: string;
-  };
+  id: string;
+  name: string;
+  email: string;
 }
 
-const Board = ({ user }: User): ReactElement => {
-  const { signOut } = useAuth();
+interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  job: string;
+  profile_picture: string;
+}
 
-  const [isUserDetailsModalOpen, setIsUserDetailsModalOpen] = useState(false);
-  const handleOpenUserDetailsModal = () => setIsUserDetailsModalOpen(true);
-  const handleCloseUserDetailsModal = () => setIsUserDetailsModalOpen(false);
+interface Props {
+  user: User;
+  employees: Employee[];
+  token: string;
+}
 
-  const handleSignOut = () => {
-    console.log('signout');
-    signOut();
-  };
+const Board = ({ user, employees, token }: Props): ReactElement => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [employeeId, setEmployeeId] = useState();
+
+  const handleDeleteEmployee = useCallback(async id => {
+    setIsModalOpen(true);
+    setEmployeeId(id);
+  }, []);
 
   return (
     <Container>
-      <Navbar>
-        <img
-          src="http://vignette2.wikia.nocookie.net/mlg-parody/images/0/05/Doge.png/revision/latest?cb=20151014005818"
-          alt="Logo"
-        />
-        <div>
-          <h2>Olá, {user.name}</h2>
-          <button type="button" onClick={handleSignOut}>
-            Sair
-          </button>
-        </div>
-      </Navbar>
+      <Navbar user={user} />
 
       <AddUser>
-        <a href="#">Adicionar usuário</a>
+        <Link href="/create">
+          <a>Adicionar funcionário</a>
+        </Link>
       </AddUser>
 
       <UsersContainer>
-        <Card>
-          <img
-            src="http://vignette2.wikia.nocookie.net/mlg-parody/images/0/05/Doge.png/revision/latest?cb=20151014005818"
-            alt="user"
-          />
-          <p>Nome</p>
-          <p>email</p>
-          <p>empresa</p>
-          <p>data de ingresso</p>
-          <p>projetos que participou</p>
-          <button type="button" onClick={() => setIsUserDetailsModalOpen(true)}>
-            Modal
-          </button>
+        {employees ? (
+          employees.map(employee => (
+            <Card key={employee.id}>
+              <img src={employee.profile_picture} alt="Employee" />
+              <p>{employee.name}</p>
+              <p>{employee.email}</p>
+              <p>{employee.job}</p>
 
-          <CardIcons>
-            <button type="button" onClick={() => {}}>
-              <img src="/delete.svg" alt="Delete" />
-            </button>
-            <Link href="#">
-              <a>
-                <img src="/edit.svg" alt="Edit" />
-              </a>
-            </Link>
-          </CardIcons>
-        </Card>
-
-        <Card>
-          <img
-            src="http://vignette2.wikia.nocookie.net/mlg-parody/images/0/05/Doge.png/revision/latest?cb=20151014005818"
-            alt="user"
-          />
-          <p>Nome</p>
-          <p>email</p>
-          <p>empresa</p>
-          <p>data de ingresso</p>
-          <p>projetos que participou</p>
-        </Card>
-
-        <Card>
-          <img
-            src="http://vignette2.wikia.nocookie.net/mlg-parody/images/0/05/Doge.png/revision/latest?cb=20151014005818"
-            alt="user"
-          />
-          <p>Nome</p>
-          <p>email</p>
-          <p>empresa</p>
-          <p>data de ingresso</p>
-          <p>projetos que participou</p>
-        </Card>
+              <CardIcons>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteEmployee(employee.id)}
+                >
+                  <img src="/delete.svg" alt="Delete" />
+                </button>
+                <Link
+                  href={{
+                    pathname: '/edit',
+                    query: { id: employee.id },
+                  }}
+                >
+                  <a>
+                    <img src="/edit.svg" alt="Edit" />
+                  </a>
+                </Link>
+              </CardIcons>
+            </Card>
+          ))
+        ) : (
+          <EmptyMessage>
+            <h1>Wow, tão vazio!</h1>
+          </EmptyMessage>
+        )}
       </UsersContainer>
 
-      <UserInfoModal
-        isOpen={isUserDetailsModalOpen}
-        onRequestClose={handleCloseUserDetailsModal}
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        id={employeeId}
+        token={token}
       />
     </Container>
   );
@@ -127,7 +118,18 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
 
   const user = cookies['socialmedia.user'];
   const parsedUser = JSON.parse(user);
+
+  const employees = await api.get('employees', {
+    headers: {
+      Authorization: `Bearer ${cookies['socialmedia.token']}`,
+    },
+  });
+
   return {
-    props: { user: parsedUser },
+    props: {
+      user: parsedUser,
+      employees: employees.data,
+      token: cookies['socialmedia.token'],
+    },
   };
 };
